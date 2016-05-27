@@ -7,6 +7,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.FaceDetector;
+import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
@@ -39,12 +40,12 @@ public class BebopVideoView extends ImageView{
     private boolean mIsCodecConfigured = false;
     private ByteBuffer mSpsBuffer;
     private ByteBuffer mPpsBuffer;
-
+    public byte[] ba = null;
     private ByteBuffer[] mBuffers;
     public Bitmap lastFrame = null;
     public Handler mHandler = null;
-    private static final int VIDEO_WIDTH = 640;
-    private static final int VIDEO_HEIGHT = 368;
+    public static final int VIDEO_WIDTH = 640;
+    public static final int VIDEO_HEIGHT = 368;
     private FaceDetector mFaceDetector = new FaceDetector(VIDEO_WIDTH,VIDEO_HEIGHT,10);
     private FaceDetector.Face[] faces = new FaceDetector.Face[10];
 
@@ -66,8 +67,6 @@ public class BebopVideoView extends ImageView{
 
     private void customInit() {
         mReadyLock = new ReentrantLock();
-        //setWillNotDraw(false);
-        //getHolder().addCallback(this);
         mReadyLock.lock();
         initMediaCodec(VIDEO_MIME_TYPE);
         mReadyLock.unlock();
@@ -117,24 +116,19 @@ public class BebopVideoView extends ImageView{
             try {
                 outIndex = mMediaCodec.dequeueOutputBuffer(info, 0);
                 while (outIndex >= 0) {
-                    //ByteBuffer[] outputbuffers = mMediaCodec.getOutputBuffers();
-                    ByteBuffer buffer = mMediaCodec.getOutputBuffer(outIndex); //The bytebuffer i want to convert to bitmap
-                    buffer.position(info.offset);
-                    buffer.limit(info.offset + info.size);
-                    byte[] ba = new byte[buffer.remaining()];
-                    buffer.get(ba);
-                    //System.out.println("[TCL DEBUG:]"+ba[1]);
-
-                    YuvImage yuvimage = new YuvImage(ba, ImageFormat.NV21, VIDEO_WIDTH, VIDEO_HEIGHT, null);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    //System.out.println("[TCL DEBUG:]"+yuvimage.getYuvData().length);
-                    yuvimage.compressToJpeg(new Rect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT), 10, baos);
-                    byte[] jdata = baos.toByteArray();
-                    Bitmap bmp = BitmapFactory.decodeByteArray(jdata, 0, jdata.length);
-                    Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
-                    int facecount = mFaceDetector.findFaces(mutableBitmap, faces);
-                    System.out.println("[TCL DEBUG:]Face found"+facecount);
-                    lastFrame = bmp;
+                    /**
+                     * store the raw video into the last frame buffer
+                     */
+//                    ByteBuffer buffer = mMediaCodec.getOutputBuffer(outIndex); //The bytebuffer i want to convert to bitmap
+                    Image imf = mMediaCodec.getOutputImage(outIndex);
+//                    System.out.println("[TCL DEBUG]:Image format"+imf.getFormat());
+//                    buffer.position(info.offset);
+//                    buffer.limit(info.offset + info.size);
+//                    ba = null;
+//                    ba = new byte[buffer.remaining()];
+//                    buffer.get(ba);
+                    ba=null;
+                    ba = convertYUV420ToN21(imf);
                     mMediaCodec.releaseOutputBuffer(outIndex, false);
                     outIndex = mMediaCodec.dequeueOutputBuffer(info, 0);
                 }
@@ -144,7 +138,20 @@ public class BebopVideoView extends ImageView{
         }
         mReadyLock.unlock();
     }
+    private byte[] convertYUV420ToN21(Image imgYUV420) {
+        byte[] rez = new byte[0];
 
+        ByteBuffer buffer0 = imgYUV420.getPlanes()[0].getBuffer();
+        ByteBuffer buffer2 = imgYUV420.getPlanes()[2].getBuffer();
+        int buffer0_size = buffer0.remaining();
+        int buffer2_size = buffer2.remaining();
+        rez = new byte[buffer0_size + buffer2_size];
+
+        buffer0.get(rez, 0, buffer0_size);
+        buffer2.get(rez, buffer0_size, buffer2_size);
+
+        return rez;
+    }
     public void configureDecoder(ARControllerCodec codec) {
         mReadyLock.lock();
 

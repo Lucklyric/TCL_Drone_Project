@@ -4,8 +4,12 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.media.FaceDetector;
 import android.os.Bundle;
 
@@ -30,6 +34,8 @@ import com.tcl.alvin.tcl_drone_project.model.MyHandler;
 
 import com.tcl.alvin.tcl_drone_project.view.BebopVideoView;
 
+import java.io.ByteArrayOutputStream;
+
 
 /**
  * Created by Alvin on 2016-05-25.
@@ -50,27 +56,10 @@ public class BebopActivity extends AppCompatActivity {
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
     private final Handler handler = new MyHandler(this);
+    private FaceDetector mFaceDetector = new FaceDetector(mVideoView.VIDEO_WIDTH,mVideoView.VIDEO_HEIGHT,10);
+    private FaceDetector.Face[] faces = new FaceDetector.Face[10];
 
 
-    private Runnable mStatusChecker = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mVideoView.lastFrame != null){
-                            mVideoView.setImageBitmap(mVideoView.lastFrame);
-                        }
-                    }
-                }); //this function can change value of mInterval.
-            } finally {
-                // 100% guarantee that this always happens, even if
-                // your update method throws an exception
-                handler.postDelayed(mStatusChecker, 1000/180);
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -376,6 +365,37 @@ public class BebopActivity extends AppCompatActivity {
         mBatteryLabel = (TextView) findViewById(R.id.batteryLabel);
     }
 
+    /**
+     * Time out update function
+     */
+    private Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        /**
+                         * Update the latest frame on the image view
+                         */
+                        if (mVideoView.ba != null){
+                            YuvImage yuvimage = new YuvImage(mVideoView.ba, ImageFormat.NV21, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT, null);
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            yuvimage.compressToJpeg(new Rect(0, 0, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT), 100, baos);
+                            byte[] jdata = baos.toByteArray();
+                            Bitmap bmp = BitmapFactory.decodeByteArray(jdata,0,jdata.length);
+                           // Bitmap bmp = Bitmap.createBitmap(mVideoView.VIDEO_WIDTH,mVideoView.VIDEO_HEIGHT, Bitmap.Config.RGB_565);
+                            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
+                            mVideoView.setImageBitmap(bmp);
+                        }
+                    }
+                }); //this function can change value of mInterval.
+            } finally {
+                handler.postDelayed(mStatusChecker, 1000/60);
+            }
+        }
+    };
+
     private final BebopDrone.Listener mBebopListener = new BebopDrone.Listener() {
         @Override
         public void onDroneConnectionChanged(ARCONTROLLER_DEVICE_STATE_ENUM state) {
@@ -478,4 +498,6 @@ public class BebopActivity extends AppCompatActivity {
             }
         }
     };
+
+
 }
