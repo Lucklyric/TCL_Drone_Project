@@ -1,27 +1,39 @@
 package com.tcl.alvin.tcl_drone_project.activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
-import android.media.FaceDetector;
+//import android.media.FaceDetector;
 import android.os.Bundle;
 
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
 
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.MultiProcessor;
+import com.google.android.gms.vision.Tracker;
+import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.FaceDetector;
+import com.google.android.gms.vision.face.Landmark;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
@@ -33,6 +45,8 @@ import com.tcl.alvin.tcl_drone_project.model.BebopDrone;
 import com.tcl.alvin.tcl_drone_project.model.MyHandler;
 
 import com.tcl.alvin.tcl_drone_project.view.BebopVideoView;
+import com.tcl.alvin.tcl_drone_project.view.FaceGraphic;
+import com.tcl.alvin.tcl_drone_project.view.GraphicOverlay;
 
 import java.io.ByteArrayOutputStream;
 
@@ -52,14 +66,12 @@ public class BebopActivity extends AppCompatActivity {
     private TextView mBatteryLabel;
     private Button mTakeOffLandBt;
     private Button mDownloadBt;
-    public ImageView mframe;
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
+    private GraphicOverlay mGraphicOverlay;
     private final Handler handler = new MyHandler(this);
-    private FaceDetector mFaceDetector = new FaceDetector(mVideoView.VIDEO_WIDTH,mVideoView.VIDEO_HEIGHT,10);
-    private FaceDetector.Face[] faces = new FaceDetector.Face[10];
 
-
+    private FaceDetector detector = null; /*Using Google Vision API*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,8 +131,53 @@ public class BebopActivity extends AppCompatActivity {
         }
     }
 
+    private void configureOverLay(){
+        int orientation = this.getResources().getConfiguration().orientation;
+//        int min = Math.min(mVideoView.getWidth(), mVideoView.getHeight());
+//        int max = Math.max(mVideoView.getWidth(), mVideoView.getHeight());
+//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            mGraphicOverlay.setCameraInfo(max, min,0);
+//        }
+//        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mGraphicOverlay.setCameraInfo(mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT,0);
+//        }
+        mGraphicOverlay.clear();
+
+    }
+
     private void initIHM() {
+        /*Init self bebop video view*/
         mVideoView = (BebopVideoView) findViewById(R.id.videoView);
+
+        /*Init overlay view*/
+        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
+        configureOverLay();
+        Context context = getApplicationContext();
+
+        /*Create the face detector*/
+        detector = new FaceDetector.Builder(context)
+                .setTrackingEnabled(true)
+                .setLandmarkType(FaceDetector.NO_LANDMARKS)
+                .setMode(FaceDetector.FAST_MODE)
+                .setClassificationType(FaceDetector.NO_CLASSIFICATIONS)
+                .build();
+
+        /*Create the multi processor*/
+        detector.setProcessor(
+                new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
+                        .build());
+
+        if (!detector.isOperational()) {
+            // Note: The first time that an app using face API is installed on a device, GMS will
+            // download a native library to the device in order to do detection.  Usually this
+            // completes before the app is run for the first time.  But if that download has not yet
+            // completed, then the above call will not detect any faces.
+            //
+            // isOperational() can be used to check if the required native library is currently
+            // available.  The detector will automatically become operational once the library
+            // download completes on device.
+            Log.w(TAG, "Face detector dependencies are not yet available.");
+        }
 
         findViewById(R.id.emergencyBt).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -384,14 +441,36 @@ public class BebopActivity extends AppCompatActivity {
                             yuvimage.compressToJpeg(new Rect(0, 0, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT), 100, baos);
                             byte[] jdata = baos.toByteArray();
                             Bitmap bmp = BitmapFactory.decodeByteArray(jdata,0,jdata.length);
-                           // Bitmap bmp = Bitmap.createBitmap(mVideoView.VIDEO_WIDTH,mVideoView.VIDEO_HEIGHT, Bitmap.Config.RGB_565);
-                            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
+//                            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
+//                            int face_count = mFaceDetector.findFaces(mutableBitmap, faces);
+//                            Log.d("Face_Detection", "Face Count: " + String.valueOf(face_count));
+//                            Canvas canvas = new Canvas(mutableBitmap);
+//
+//                            for (int i = 0; i < face_count; i++) {
+//                                FaceDetector.Face face = faces[i];
+//                                tmp_paint.setColor(Color.RED);
+//                                tmp_paint.setAlpha(100);
+//                                face.getMidPoint(tmp_point);
+//                                canvas.drawCircle(tmp_point.x, tmp_point.y, face.eyesDistance(),
+//                                        tmp_paint);
+//                            }
+                            Frame frame = new Frame.Builder().setBitmap(bmp).build();
+
+
+//                            SparseArray<Face> faces = detector.detect(frame);
+//                            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
+//                            Canvas canvas = new Canvas(mutableBitmap);
+//                            for (int i = 0; i < faces.size(); ++i) {
+//                                Face face = faces.valueAt(i);
+//                                canvas.drawCircle(face.getPosition().x, face.getPosition().y, 10, tmp_paint);
+//                            }
+                            detector.receiveFrame(frame);
                             mVideoView.setImageBitmap(bmp);
                         }
                     }
                 }); //this function can change value of mInterval.
             } finally {
-                handler.postDelayed(mStatusChecker, 1000/60);
+                handler.postDelayed(mStatusChecker, 1000/15);
             }
         }
     };
@@ -499,5 +578,65 @@ public class BebopActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
+     * uses this factory to create face trackers as needed -- one for each individual.
+     */
+    private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
+        @Override
+        public Tracker<Face> create(Face face) {
+            System.out.println("[TCL DEBUG]:Create face");
+            return new GraphicFaceTracker(mGraphicOverlay);
+        }
+    }
 
+    /**
+     * Face tracker for each detected individual. This maintains a face graphic within the app's
+     * associated face overlay.
+     */
+    private class GraphicFaceTracker extends Tracker<Face> {
+        private GraphicOverlay mOverlay;
+        private FaceGraphic mFaceGraphic;
+
+        GraphicFaceTracker(GraphicOverlay overlay) {
+            mOverlay = overlay;
+            mFaceGraphic = new FaceGraphic(overlay);
+        }
+
+        /**
+         * Start tracking the detected face instance within the face overlay.
+         */
+        @Override
+        public void onNewItem(int faceId, Face item) {
+            mFaceGraphic.setId(faceId);
+        }
+
+        /**
+         * Update the position/characteristics of the face within the overlay.
+         */
+        @Override
+        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
+            mOverlay.add(mFaceGraphic);
+            mFaceGraphic.updateFace(face);
+        }
+
+        /**
+         * Hide the graphic when the corresponding face was not detected.  This can happen for
+         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
+         * view).
+         */
+        @Override
+        public void onMissing(FaceDetector.Detections<Face> detectionResults) {
+            mOverlay.remove(mFaceGraphic);
+        }
+
+        /**
+         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
+         * the overlay.
+         */
+        @Override
+        public void onDone() {
+            mOverlay.remove(mFaceGraphic);
+        }
+    }
 }

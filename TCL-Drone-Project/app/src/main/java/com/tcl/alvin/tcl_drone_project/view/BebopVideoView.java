@@ -119,14 +119,7 @@ public class BebopVideoView extends ImageView{
                     /**
                      * store the raw video into the last frame buffer
                      */
-//                    ByteBuffer buffer = mMediaCodec.getOutputBuffer(outIndex); //The bytebuffer i want to convert to bitmap
                     Image imf = mMediaCodec.getOutputImage(outIndex);
-//                    System.out.println("[TCL DEBUG]:Image format"+imf.getFormat());
-//                    buffer.position(info.offset);
-//                    buffer.limit(info.offset + info.size);
-//                    ba = null;
-//                    ba = new byte[buffer.remaining()];
-//                    buffer.get(ba);
                     ba=null;
                     ba = convertYUV420ToN21(imf);
                     mMediaCodec.releaseOutputBuffer(outIndex, false);
