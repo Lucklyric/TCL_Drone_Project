@@ -143,7 +143,8 @@ public class TCLBebopActivity extends AppCompatActivity {
                 .setClassificationType(FaceDetector.NO_CLASSIFICATIONS)
                 .build();
 
-       mGraphicFaceTrackerFactory = new TCLGraphicFaceTrackerFactory(mGraphicOverlay);
+        /*Create the custom factory processor*/
+        mGraphicFaceTrackerFactory = new TCLGraphicFaceTrackerFactory(mGraphicOverlay);
 
         /*Create the multi processor*/
         detector.setProcessor(
@@ -207,6 +208,8 @@ public class TCLBebopActivity extends AppCompatActivity {
 //                    }
 //                });
 //                mDownloadProgressDialog.show();
+
+                /*No need download function*/
                 outPutFaceFlag = true;
             }
         });
@@ -440,7 +443,6 @@ public class TCLBebopActivity extends AppCompatActivity {
 //                            }
                             Frame frame = new Frame.Builder().setBitmap(bmp).build();
 
-
 //                            SparseArray<Face> faces = detector.detect(frame);
 //                            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
 //                            Canvas canvas = new Canvas(mutableBitmap);
@@ -449,10 +451,11 @@ public class TCLBebopActivity extends AppCompatActivity {
 //                                canvas.drawCircle(face.getPosition().x, face.getPosition().y, 10, tmp_paint);
 //                            }
                             System.out.println("[TCL DEBUG]:Before send receive frame");
-                            mGraphicFaceTrackerFactory.resetFaces();
-                            detector.receiveFrame(frame);
-                            mGraphicFaceTrackerFactory.setmCurrentFrame(bmp);
+                            mGraphicFaceTrackerFactory.resetFaces(); /*Clear face array*/
+                            detector.receiveFrame(frame); /*Feed frame to detector*/
+                            mGraphicFaceTrackerFactory.setmCurrentFrame(bmp); /*Set base frame of factory*/
                             if (outPutFaceFlag){
+                                /*Output all faces to the phone storage*/
                                 mGraphicFaceTrackerFactory.saveAllFaces();
                                 outPutFaceFlag = false;
                             }
