@@ -43,7 +43,7 @@ import java.util.Set;
  * from the preview's coordinate system to the view coordinate system.</li>
  * </ol>
  */
-public class GraphicOverlay extends View {
+public class TCLGraphicOverlay extends View {
     private final Object mLock = new Object();
     private int mPreviewWidth;
     private float mWidthScaleFactor = 1.0f;
@@ -55,12 +55,12 @@ public class GraphicOverlay extends View {
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay.  Subclass
      * this and implement the {@link Graphic#draw(Canvas)} method to define the
-     * graphics element.  Add instances to the overlay using {@link GraphicOverlay#add(Graphic)}.
+     * graphics element.  Add instances to the overlay using {@link TCLGraphicOverlay#add(Graphic)}.
      */
     public static abstract class Graphic {
-        private GraphicOverlay mOverlay;
+        private TCLGraphicOverlay mOverlay;
 
-        public Graphic(GraphicOverlay overlay) {
+        public Graphic(TCLGraphicOverlay overlay) {
             mOverlay = overlay;
         }
 
@@ -118,7 +118,7 @@ public class GraphicOverlay extends View {
         }
     }
 
-    public GraphicOverlay(Context context, AttributeSet attrs) {
+    public TCLGraphicOverlay(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 

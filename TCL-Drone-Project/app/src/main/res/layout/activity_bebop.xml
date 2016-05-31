@@ -3,15 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.BebopActivity"
+    tools:context=".activity.TCLBebopActivity"
     android:id="@+id/piloting_view">
 
-    <com.tcl.alvin.tcl_drone_project.view.BebopVideoView
+    <com.tcl.alvin.tcl_drone_project.view.TCLBebopVideoView
         android:id="@+id/videoView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.tcl.alvin.tcl_drone_project.view.GraphicOverlay
+    <com.tcl.alvin.tcl_drone_project.view.TCLGraphicOverlay
         android:id="@+id/faceOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

@@ -29,7 +29,7 @@ import java.util.logging.Handler;
 /**
  * Created by Alvin on 2016-05-25.
  */
-public class BebopVideoView extends ImageView{
+public class TCLBebopVideoView extends ImageView{
     private static final String TAG = "BebopVideoView";
     private static final String VIDEO_MIME_TYPE = "video/avc";
     private static final int VIDEO_DEQUEUE_TIMEOUT = 33000;
@@ -49,17 +49,17 @@ public class BebopVideoView extends ImageView{
     private FaceDetector mFaceDetector = new FaceDetector(VIDEO_WIDTH,VIDEO_HEIGHT,10);
     private FaceDetector.Face[] faces = new FaceDetector.Face[10];
 
-    public BebopVideoView(Context context) {
+    public TCLBebopVideoView(Context context) {
         super(context);
         customInit();
     }
 
-    public BebopVideoView(Context context, AttributeSet attrs) {
+    public TCLBebopVideoView(Context context, AttributeSet attrs) {
         super(context, attrs);
         customInit();
     }
 
-    public BebopVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TCLBebopVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         customInit();
     }

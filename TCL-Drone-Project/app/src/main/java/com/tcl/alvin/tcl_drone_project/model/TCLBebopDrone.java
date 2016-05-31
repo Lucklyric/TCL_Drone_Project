@@ -37,8 +37,8 @@ import java.util.List;
 /**
  * Created by Alvin on 2016-05-25.
  */
-public class BebopDrone {
-    private static final String TAG = "BebopDrone";
+public class TCLBebopDrone {
+    private static final String TAG = "TCLBebopDrone";
 
     private static final int DEVICE_PORT = 21;
 
@@ -118,7 +118,7 @@ public class BebopDrone {
     private ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM mFlyingState;
     private String mCurrentRunId;
 
-    public BebopDrone(Context context, @NonNull ARDiscoveryDeviceService deviceService) {
+    public TCLBebopDrone(Context context, @NonNull ARDiscoveryDeviceService deviceService) {
 
         mListeners = new ArrayList<>();
 
@@ -156,7 +156,7 @@ public class BebopDrone {
             }
 
         } else {
-            Log.e(TAG, "DeviceService type is not supported by BebopDrone");
+            Log.e(TAG, "DeviceService type is not supported by TCLBebopDrone");
         }
     }
 
@@ -246,7 +246,7 @@ public class BebopDrone {
 
     /**
      * Set the forward/backward angle of the drone
-     * Note that {@link BebopDrone#setFlag(byte)} should be set to 1 in order to take in account the pitch value
+     * Note that {@link TCLBebopDrone#setFlag(byte)} should be set to 1 in order to take in account the pitch value
      * @param pitch value in percentage from -100 to 100
      */
     public void setPitch(byte pitch) {
@@ -257,7 +257,7 @@ public class BebopDrone {
 
     /**
      * Set the side angle of the drone
-     * Note that {@link BebopDrone#setFlag(byte)} should be set to 1 in order to take in account the roll value
+     * Note that {@link TCLBebopDrone#setFlag(byte)} should be set to 1 in order to take in account the roll value
      * @param roll value in percentage from -100 to 100
      */
     public void setRoll(byte roll) {

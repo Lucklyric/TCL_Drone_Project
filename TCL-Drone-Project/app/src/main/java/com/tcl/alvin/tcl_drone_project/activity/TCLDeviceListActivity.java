@@ -17,18 +17,18 @@ import com.parrot.arsdk.ardiscovery.ARDISCOVERY_PRODUCT_ENUM;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryService;
 import com.tcl.alvin.tcl_drone_project.R;
-import com.tcl.alvin.tcl_drone_project.model.DroneDiscoverer;
+import com.tcl.alvin.tcl_drone_project.controller.TCLDroneDiscoverer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeviceListActivity extends AppCompatActivity {
+public class TCLDeviceListActivity extends AppCompatActivity {
 
     public static final String EXTRA_DEVICE_SERVICE = "EXTRA_DEVICE_SERVICE";
 
-    private static final String TAG = "DeviceListActivity";
+    private static final String TAG = "TCLDeviceListActivity";
 
-    public DroneDiscoverer mDroneDiscoverer;
+    public TCLDroneDiscoverer mDroneDiscoverer;
 
     private final List<ARDiscoveryDeviceService> mDronesList = new ArrayList<>();
 
@@ -60,7 +60,7 @@ public class DeviceListActivity extends AppCompatActivity {
                 switch (product) {
                     case ARDISCOVERY_PRODUCT_ARDRONE:
                     case ARDISCOVERY_PRODUCT_BEBOP_2:
-                        intent = new Intent(DeviceListActivity.this, BebopActivity.class);
+                        intent = new Intent(TCLDeviceListActivity.this, TCLBebopActivity.class);
                         break;
 
                     default:
@@ -74,7 +74,7 @@ public class DeviceListActivity extends AppCompatActivity {
             }
         });
 
-        mDroneDiscoverer = new DroneDiscoverer(this);
+        mDroneDiscoverer = new TCLDroneDiscoverer(this);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class DeviceListActivity extends AppCompatActivity {
         mDroneDiscoverer.removeListener(mDiscovererListener);
     }
 
-    private final DroneDiscoverer.Listener mDiscovererListener = new  DroneDiscoverer.Listener() {
+    private final TCLDroneDiscoverer.Listener mDiscovererListener = new  TCLDroneDiscoverer.Listener() {
 
         @Override
         public void onDronesListUpdated(List<ARDiscoveryDeviceService> dronesList) {

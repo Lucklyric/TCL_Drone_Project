@@ -4,14 +4,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 //import android.media.FaceDetector;
@@ -20,20 +15,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.MultiProcessor;
-import com.google.android.gms.vision.Tracker;
-import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
-import com.google.android.gms.vision.face.Landmark;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
@@ -41,12 +30,12 @@ import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.tcl.alvin.tcl_drone_project.R;
-import com.tcl.alvin.tcl_drone_project.model.BebopDrone;
-import com.tcl.alvin.tcl_drone_project.model.MyHandler;
+import com.tcl.alvin.tcl_drone_project.model.TCLBebopDrone;
+import com.tcl.alvin.tcl_drone_project.controller.TCLGraphicFaceTrackerFactory;
+import com.tcl.alvin.tcl_drone_project.model.TCLBebopHandler;
 
-import com.tcl.alvin.tcl_drone_project.view.BebopVideoView;
-import com.tcl.alvin.tcl_drone_project.view.FaceGraphic;
-import com.tcl.alvin.tcl_drone_project.view.GraphicOverlay;
+import com.tcl.alvin.tcl_drone_project.view.TCLBebopVideoView;
+import com.tcl.alvin.tcl_drone_project.view.TCLGraphicOverlay;
 
 import java.io.ByteArrayOutputStream;
 
@@ -54,22 +43,22 @@ import java.io.ByteArrayOutputStream;
 /**
  * Created by Alvin on 2016-05-25.
  */
-public class BebopActivity extends AppCompatActivity {
-    private static final String TAG = "BebopActivity";
-    private BebopDrone mBebopDrone;
+public class TCLBebopActivity extends AppCompatActivity {
+    private static final String TAG = "TCLBebopActivity";
+    private TCLBebopDrone mBebopDrone;
 
     private ProgressDialog mConnectionProgressDialog;
     private ProgressDialog mDownloadProgressDialog;
 
-    public BebopVideoView mVideoView;
+    public TCLBebopVideoView mVideoView;
 
     private TextView mBatteryLabel;
     private Button mTakeOffLandBt;
     private Button mDownloadBt;
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
-    private GraphicOverlay mGraphicOverlay;
-    private final Handler handler = new MyHandler(this);
+    private TCLGraphicOverlay mGraphicOverlay;
+    private final Handler handler = new TCLBebopHandler(this);
 
     private FaceDetector detector = null; /*Using Google Vision API*/
 
@@ -81,8 +70,8 @@ public class BebopActivity extends AppCompatActivity {
         initIHM();
 
         Intent intent = getIntent();
-        ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.EXTRA_DEVICE_SERVICE);
-        mBebopDrone = new BebopDrone(this, service);
+        ARDiscoveryDeviceService service = intent.getParcelableExtra(TCLDeviceListActivity.EXTRA_DEVICE_SERVICE);
+        mBebopDrone = new TCLBebopDrone(this, service);
         mBebopDrone.addListener(mBebopListener);
         mStatusChecker.run();
 
@@ -132,25 +121,16 @@ public class BebopActivity extends AppCompatActivity {
     }
 
     private void configureOverLay(){
-        int orientation = this.getResources().getConfiguration().orientation;
-//        int min = Math.min(mVideoView.getWidth(), mVideoView.getHeight());
-//        int max = Math.max(mVideoView.getWidth(), mVideoView.getHeight());
-//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            mGraphicOverlay.setCameraInfo(max, min,0);
-//        }
-//        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mGraphicOverlay.setCameraInfo(mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT,0);
-//        }
+        mGraphicOverlay.setCameraInfo(mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT,0);
         mGraphicOverlay.clear();
-
     }
 
     private void initIHM() {
         /*Init self bebop video view*/
-        mVideoView = (BebopVideoView) findViewById(R.id.videoView);
+        mVideoView = (TCLBebopVideoView) findViewById(R.id.videoView);
 
         /*Init overlay view*/
-        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
+        mGraphicOverlay = (TCLGraphicOverlay) findViewById(R.id.faceOverlay);
         configureOverLay();
         Context context = getApplicationContext();
 
@@ -164,7 +144,7 @@ public class BebopActivity extends AppCompatActivity {
 
         /*Create the multi processor*/
         detector.setProcessor(
-                new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
+                new MultiProcessor.Builder<>(new TCLGraphicFaceTrackerFactory(mGraphicOverlay))
                         .build());
 
         if (!detector.isOperational()) {
@@ -213,7 +193,7 @@ public class BebopActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mBebopDrone.getLastFlightMedias();
 
-                mDownloadProgressDialog = new ProgressDialog(BebopActivity.this, R.style.AppCompatAlertDialogStyle);
+                mDownloadProgressDialog = new ProgressDialog(TCLBebopActivity.this, R.style.AppCompatAlertDialogStyle);
                 mDownloadProgressDialog.setIndeterminate(true);
                 mDownloadProgressDialog.setMessage("Fetching medias");
                 mDownloadProgressDialog.setCancelable(false);
@@ -475,7 +455,10 @@ public class BebopActivity extends AppCompatActivity {
         }
     };
 
-    private final BebopDrone.Listener mBebopListener = new BebopDrone.Listener() {
+    /**
+     * TCLBebopDrone callbacks
+     */
+    private final TCLBebopDrone.Listener mBebopListener = new TCLBebopDrone.Listener() {
         @Override
         public void onDroneConnectionChanged(ARCONTROLLER_DEVICE_STATE_ENUM state) {
             switch (state)
@@ -543,7 +526,7 @@ public class BebopActivity extends AppCompatActivity {
             mCurrentDownloadIndex = 1;
 
             if (nbMedias > 0) {
-                mDownloadProgressDialog = new ProgressDialog(BebopActivity.this, R.style.AppCompatAlertDialogStyle);
+                mDownloadProgressDialog = new ProgressDialog(TCLBebopActivity.this, R.style.AppCompatAlertDialogStyle);
                 mDownloadProgressDialog.setIndeterminate(false);
                 mDownloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 mDownloadProgressDialog.setMessage("Downloading medias");
@@ -577,66 +560,4 @@ public class BebopActivity extends AppCompatActivity {
             }
         }
     };
-
-    /**
-     * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
-     * uses this factory to create face trackers as needed -- one for each individual.
-     */
-    private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
-        @Override
-        public Tracker<Face> create(Face face) {
-            System.out.println("[TCL DEBUG]:Create face");
-            return new GraphicFaceTracker(mGraphicOverlay);
-        }
-    }
-
-    /**
-     * Face tracker for each detected individual. This maintains a face graphic within the app's
-     * associated face overlay.
-     */
-    private class GraphicFaceTracker extends Tracker<Face> {
-        private GraphicOverlay mOverlay;
-        private FaceGraphic mFaceGraphic;
-
-        GraphicFaceTracker(GraphicOverlay overlay) {
-            mOverlay = overlay;
-            mFaceGraphic = new FaceGraphic(overlay);
-        }
-
-        /**
-         * Start tracking the detected face instance within the face overlay.
-         */
-        @Override
-        public void onNewItem(int faceId, Face item) {
-            mFaceGraphic.setId(faceId);
-        }
-
-        /**
-         * Update the position/characteristics of the face within the overlay.
-         */
-        @Override
-        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-            mOverlay.add(mFaceGraphic);
-            mFaceGraphic.updateFace(face);
-        }
-
-        /**
-         * Hide the graphic when the corresponding face was not detected.  This can happen for
-         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
-         * view).
-         */
-        @Override
-        public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-            mOverlay.remove(mFaceGraphic);
-        }
-
-        /**
-         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
-         * the overlay.
-         */
-        @Override
-        public void onDone() {
-            mOverlay.remove(mFaceGraphic);
-        }
-    }
 }

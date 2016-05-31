@@ -1,4 +1,4 @@
-package com.tcl.alvin.tcl_drone_project.model;
+package com.tcl.alvin.tcl_drone_project.controller;
 
 /**
  * Created by Alvin on 2016-05-25.
@@ -23,9 +23,9 @@ import com.parrot.arsdk.ardiscovery.receivers.ARDiscoveryServicesDevicesListUpda
 import com.parrot.arsdk.ardiscovery.receivers.ARDiscoveryServicesDevicesListUpdatedReceiverDelegate;
 
 
-public class DroneDiscoverer
+public class TCLDroneDiscoverer
 {
-    private static final String TAG = "DroneDiscoverer";
+    private static final String TAG = "TCLDroneDiscoverer";
 
     public interface Listener {
         /**
@@ -50,7 +50,7 @@ public class DroneDiscoverer
 
     private boolean mStartDiscoveryAfterConnection;
 
-    public DroneDiscoverer(Context ctx) {
+    public TCLDroneDiscoverer(Context ctx) {
         mCtx = ctx;
 
         mListeners = new ArrayList<>();
