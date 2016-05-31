@@ -4,6 +4,8 @@ package com.tcl.alvin.tcl_drone_project.controller;
  * Created by Alvin on 2016-05-30.
  */
 
+import android.graphics.Bitmap;
+
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
@@ -17,10 +19,12 @@ import com.tcl.alvin.tcl_drone_project.view.TCLGraphicOverlay;
 public class TCLGraphicFaceTracker extends Tracker<Face> {
     private TCLGraphicOverlay mOverlay;
     private TCLFaceGraphic mFaceGraphic;
+    private TCLGraphicFaceTrackerFactory mFactorInstance;
 
-    TCLGraphicFaceTracker(TCLGraphicOverlay overlay) {
+    TCLGraphicFaceTracker(TCLGraphicOverlay overlay,TCLGraphicFaceTrackerFactory instance) {
         mOverlay = overlay;
         mFaceGraphic = new TCLFaceGraphic(overlay);
+        mFactorInstance = instance;
     }
 
     /**
@@ -38,6 +42,8 @@ public class TCLGraphicFaceTracker extends Tracker<Face> {
     public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
         mOverlay.add(mFaceGraphic);
         mFaceGraphic.updateFace(face);
+        mFactorInstance.enterFace(face);
+        System.out.println("[TCL DEBUG]: update face position");
     }
 
     /**

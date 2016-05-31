@@ -123,7 +123,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Download"
+        android:text="Crop Faces"
         android:id="@+id/downloadBt"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

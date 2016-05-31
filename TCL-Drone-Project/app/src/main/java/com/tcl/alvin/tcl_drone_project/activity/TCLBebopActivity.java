@@ -59,8 +59,9 @@ public class TCLBebopActivity extends AppCompatActivity {
     private int mCurrentDownloadIndex;
     private TCLGraphicOverlay mGraphicOverlay;
     private final Handler handler = new TCLBebopHandler(this);
-
+    private TCLGraphicFaceTrackerFactory mGraphicFaceTrackerFactory = null;
     private FaceDetector detector = null; /*Using Google Vision API*/
+    private Boolean outPutFaceFlag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,10 +143,12 @@ public class TCLBebopActivity extends AppCompatActivity {
                 .setClassificationType(FaceDetector.NO_CLASSIFICATIONS)
                 .build();
 
+       mGraphicFaceTrackerFactory = new TCLGraphicFaceTrackerFactory(mGraphicOverlay);
+
         /*Create the multi processor*/
         detector.setProcessor(
-                new MultiProcessor.Builder<>(new TCLGraphicFaceTrackerFactory(mGraphicOverlay))
-                        .build());
+                (new MultiProcessor.Builder<>(mGraphicFaceTrackerFactory)
+                        .build()));
 
         if (!detector.isOperational()) {
             // Note: The first time that an app using face API is installed on a device, GMS will
@@ -188,22 +191,23 @@ public class TCLBebopActivity extends AppCompatActivity {
         });
 
         mDownloadBt = (Button)findViewById(R.id.downloadBt);
-        mDownloadBt.setEnabled(false);
+        mDownloadBt.setEnabled(true);
         mDownloadBt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mBebopDrone.getLastFlightMedias();
-
-                mDownloadProgressDialog = new ProgressDialog(TCLBebopActivity.this, R.style.AppCompatAlertDialogStyle);
-                mDownloadProgressDialog.setIndeterminate(true);
-                mDownloadProgressDialog.setMessage("Fetching medias");
-                mDownloadProgressDialog.setCancelable(false);
-                mDownloadProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mBebopDrone.cancelGetLastFlightMedias();
-                    }
-                });
-                mDownloadProgressDialog.show();
+//                mBebopDrone.getLastFlightMedias();
+//
+//                mDownloadProgressDialog = new ProgressDialog(TCLBebopActivity.this, R.style.AppCompatAlertDialogStyle);
+//                mDownloadProgressDialog.setIndeterminate(true);
+//                mDownloadProgressDialog.setMessage("Fetching medias");
+//                mDownloadProgressDialog.setCancelable(false);
+//                mDownloadProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        mBebopDrone.cancelGetLastFlightMedias();
+//                    }
+//                });
+//                mDownloadProgressDialog.show();
+                outPutFaceFlag = true;
             }
         });
 
@@ -444,7 +448,15 @@ public class TCLBebopActivity extends AppCompatActivity {
 //                                Face face = faces.valueAt(i);
 //                                canvas.drawCircle(face.getPosition().x, face.getPosition().y, 10, tmp_paint);
 //                            }
+                            System.out.println("[TCL DEBUG]:Before send receive frame");
+                            mGraphicFaceTrackerFactory.resetFaces();
                             detector.receiveFrame(frame);
+                            mGraphicFaceTrackerFactory.setmCurrentFrame(bmp);
+                            if (outPutFaceFlag){
+                                mGraphicFaceTrackerFactory.saveAllFaces();
+                                outPutFaceFlag = false;
+                            }
+                            System.out.println("[TCL DEBUG]:After send receive frame");
                             mVideoView.setImageBitmap(bmp);
                         }
                     }
@@ -489,17 +501,17 @@ public class TCLBebopActivity extends AppCompatActivity {
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
                     mTakeOffLandBt.setText("Take off");
                     mTakeOffLandBt.setEnabled(true);
-                    mDownloadBt.setEnabled(true);
+                   // mDownloadBt.setEnabled(true);
                     break;
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
                 case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
                     mTakeOffLandBt.setText("Land");
                     mTakeOffLandBt.setEnabled(true);
-                    mDownloadBt.setEnabled(false);
+                   // mDownloadBt.setEnabled(false);
                     break;
                 default:
                     mTakeOffLandBt.setEnabled(false);
-                    mDownloadBt.setEnabled(false);
+                   // mDownloadBt.setEnabled(false);
             }
         }
 
