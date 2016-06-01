@@ -30,6 +30,7 @@ import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.tcl.alvin.tcl_drone_project.R;
+import com.tcl.alvin.tcl_drone_project.controller.TCLInteliDroneController;
 import com.tcl.alvin.tcl_drone_project.model.TCLBebopDrone;
 import com.tcl.alvin.tcl_drone_project.controller.TCLGraphicFaceTrackerFactory;
 import com.tcl.alvin.tcl_drone_project.model.TCLBebopHandler;
@@ -61,6 +62,7 @@ public class TCLBebopActivity extends AppCompatActivity {
     private final Handler handler = new TCLBebopHandler(this);
     private TCLGraphicFaceTrackerFactory mGraphicFaceTrackerFactory = null;
     private FaceDetector detector = null; /*Using Google Vision API*/
+    private TCLInteliDroneController droneController = null;
     private Boolean outPutFaceFlag = false;
 
     @Override
@@ -68,12 +70,13 @@ public class TCLBebopActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bebop);
 
-        initIHM();
+
 
         Intent intent = getIntent();
         ARDiscoveryDeviceService service = intent.getParcelableExtra(TCLDeviceListActivity.EXTRA_DEVICE_SERVICE);
         mBebopDrone = new TCLBebopDrone(this, service);
         mBebopDrone.addListener(mBebopListener);
+        initIHM();
         mStatusChecker.run();
 
     }
@@ -151,6 +154,8 @@ public class TCLBebopActivity extends AppCompatActivity {
                 (new MultiProcessor.Builder<>(mGraphicFaceTrackerFactory)
                         .build()));
 
+        /*Create the inteli controller*/
+        droneController = new TCLInteliDroneController(mVideoView.VIDEO_HEIGHT,mVideoView.VIDEO_WIDTH,mGraphicFaceTrackerFactory,mBebopDrone);
         if (!detector.isOperational()) {
             // Note: The first time that an app using face API is installed on a device, GMS will
             // download a native library to the device in order to do detection.  Usually this
@@ -459,6 +464,7 @@ public class TCLBebopActivity extends AppCompatActivity {
                                 mGraphicFaceTrackerFactory.saveAllFaces();
                                 outPutFaceFlag = false;
                             }
+                            droneController.onUpdate();
                             System.out.println("[TCL DEBUG]:After send receive frame");
                             mVideoView.setImageBitmap(bmp);
                         }

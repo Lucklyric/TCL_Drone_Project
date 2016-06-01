@@ -23,6 +23,7 @@ import java.util.Vector;
 public class TCLGraphicFaceTrackerFactory implements MultiProcessor.Factory<Face> {
     private TCLGraphicOverlay mGraphicOverlay;
     private Vector<Bitmap> mFacesBitmap = new Vector<>();
+    private Vector<Face> mFaces = new Vector<>();
     private Bitmap mCurrentFrame;
     private int count = 0;
 
@@ -32,6 +33,7 @@ public class TCLGraphicFaceTrackerFactory implements MultiProcessor.Factory<Face
 
     public void resetFaces(){
         this.mFacesBitmap.clear();
+        this.mFaces.clear();
     }
 
     public void setmCurrentFrame(Bitmap currentFrame){
@@ -49,10 +51,15 @@ public class TCLGraphicFaceTrackerFactory implements MultiProcessor.Factory<Face
         try{
             Bitmap tmp = Bitmap.createBitmap(this.mCurrentFrame,(int)face.getPosition().x,(int)face.getPosition().y,(int)face.getWidth(),(int)face.getHeight());
             mFacesBitmap.add(tmp);
+            mFaces.add(face);
         }catch (Exception e){
-
+            e.printStackTrace();
         }
 
+    }
+
+    public Vector<Face> currentFaces(){
+        return mFaces;
     }
 
     @Override
