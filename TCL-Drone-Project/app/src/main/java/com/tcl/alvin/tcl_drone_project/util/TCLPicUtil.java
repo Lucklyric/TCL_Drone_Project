@@ -23,7 +23,8 @@ public class TCLPicUtil {
     }
     public static String getCacheFilename(String filename) {
         File f = getSavePath();
-        return f.getAbsolutePath() + "/face"+filename+".png";
+        long tmp = System.currentTimeMillis();
+        return f.getAbsolutePath() + "/"+tmp+".png";
     }
 
     public static Bitmap loadFromFile(String filename) {
@@ -51,10 +52,12 @@ public class TCLPicUtil {
             out.flush();
             out.close();
             System.out.println("[TCL DEBUG]:File output successed");
-        } catch(Exception e) {}
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static boolean hasSDCard() { // SD????????
+    public static boolean hasSDCard() { // Check if has SD card
         String status = Environment.getExternalStorageState();
         return status.equals(Environment.MEDIA_MOUNTED);
     }

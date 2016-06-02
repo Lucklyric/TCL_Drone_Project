@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
 import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
+import com.tcl.alvin.tcl_drone_project.util.TCLNdkJniUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -120,8 +121,10 @@ public class TCLBebopVideoView extends ImageView{
                      * store the raw video into the last frame buffer
                      */
                     Image imf = mMediaCodec.getOutputImage(outIndex);
+
                     ba=null;
                     ba = convertYUV420ToN21(imf);
+
                     mMediaCodec.releaseOutputBuffer(outIndex, false);
                     outIndex = mMediaCodec.dequeueOutputBuffer(info, 0);
                 }

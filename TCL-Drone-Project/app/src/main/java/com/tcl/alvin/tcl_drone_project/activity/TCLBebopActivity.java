@@ -35,6 +35,7 @@ import com.tcl.alvin.tcl_drone_project.model.TCLBebopDrone;
 import com.tcl.alvin.tcl_drone_project.controller.TCLGraphicFaceTrackerFactory;
 import com.tcl.alvin.tcl_drone_project.model.TCLBebopHandler;
 
+import com.tcl.alvin.tcl_drone_project.util.TCLNdkJniUtils;
 import com.tcl.alvin.tcl_drone_project.view.TCLBebopVideoView;
 import com.tcl.alvin.tcl_drone_project.view.TCLGraphicOverlay;
 
@@ -56,6 +57,7 @@ public class TCLBebopActivity extends AppCompatActivity {
     private TextView mBatteryLabel;
     private Button mTakeOffLandBt;
     private Button mDownloadBt;
+    private Button mAutoToggleBt;
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
     private TCLGraphicOverlay mGraphicOverlay;
@@ -64,6 +66,7 @@ public class TCLBebopActivity extends AppCompatActivity {
     private FaceDetector detector = null; /*Using Google Vision API*/
     private TCLInteliDroneController droneController = null;
     private Boolean outPutFaceFlag = false;
+    private Boolean ifAutoMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,6 +221,20 @@ public class TCLBebopActivity extends AppCompatActivity {
                 outPutFaceFlag = true;
             }
         });
+
+        mAutoToggleBt = (Button)findViewById(R.id.autoToggle);
+        mAutoToggleBt.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                if (!ifAutoMode){
+                    mAutoToggleBt.setText("Stop Auto");
+                    ifAutoMode = true;
+                }else{
+                    mAutoToggleBt.setText("Start Auto");
+                    ifAutoMode = false;
+                }
+            }
+        });
+
 
         findViewById(R.id.gazUpBt).setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -433,6 +450,12 @@ public class TCLBebopActivity extends AppCompatActivity {
                             yuvimage.compressToJpeg(new Rect(0, 0, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT), 100, baos);
                             byte[] jdata = baos.toByteArray();
                             Bitmap bmp = BitmapFactory.decodeByteArray(jdata,0,jdata.length);
+
+                            Bitmap prBitmap = Bitmap.createBitmap(mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT, Bitmap.Config.ARGB_8888);
+
+                           TCLNdkJniUtils.naGetConvertedFrame(prBitmap,mVideoView.ba,mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT);
+
+
 //                            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
 //                            int face_count = mFaceDetector.findFaces(mutableBitmap, faces);
 //                            Log.d("Face_Detection", "Face Count: " + String.valueOf(face_count));
@@ -464,7 +487,9 @@ public class TCLBebopActivity extends AppCompatActivity {
                                 mGraphicFaceTrackerFactory.saveAllFaces();
                                 outPutFaceFlag = false;
                             }
-                            droneController.onUpdate();
+                            if (ifAutoMode){
+                                droneController.onUpdate();
+                            }
                             System.out.println("[TCL DEBUG]:After send receive frame");
                             mVideoView.setImageBitmap(bmp);
                         }
