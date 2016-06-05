@@ -18,6 +18,7 @@ import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryService;
 import com.tcl.alvin.tcl_drone_project.R;
 import com.tcl.alvin.tcl_drone_project.controller.TCLDroneDiscoverer;
+import com.tcl.alvin.tcl_drone_project.util.TCLNdkJniUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,8 @@ public class TCLDeviceListActivity extends AppCompatActivity {
     // it is mandatory
     static {
         ARSDK.loadSDKLibs();
+        System.loadLibrary("TCLJni");
+
     }
 
     @Override
@@ -44,7 +47,8 @@ public class TCLDeviceListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
         final ListView listView = (ListView) findViewById(R.id.list);
-
+        System.out.println("[TCL DEBUG]:"+ TCLNdkJniUtils.getStringFormC());
+        System.out.println("[TCL DEBUG]:AAAAAAAAAAAAAAAAAAAAA");
         // Assign adapter to ListView
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener()

@@ -108,9 +108,7 @@ public class TCLBebopVideoView extends ImageView{
                     }
                 }
             }
-/**
- * TODO Get a next released buffered frame and process with face detector,then modify it and put it back to the outputbuffer.
- */
+
             // Try to display previous frame
             MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
             int outIndex;
@@ -121,10 +119,14 @@ public class TCLBebopVideoView extends ImageView{
                      * store the raw video into the last frame buffer
                      */
                     Image imf = mMediaCodec.getOutputImage(outIndex);
-
+//                    ByteBuffer buffer = mMediaCodec.getOutputBuffer(outIndex);
+//                    buffer.position(info.offset);
+//                    buffer.limit(info.offset+info.size);
                     ba=null;
                     ba = convertYUV420ToN21(imf);
 
+//                    ba = new byte[buffer.remaining()];
+//                    buffer.get(ba);
                     mMediaCodec.releaseOutputBuffer(outIndex, false);
                     outIndex = mMediaCodec.dequeueOutputBuffer(info, 0);
                 }

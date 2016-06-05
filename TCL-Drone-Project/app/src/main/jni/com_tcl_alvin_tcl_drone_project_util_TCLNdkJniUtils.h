@@ -9,11 +9,19 @@ extern "C" {
 #endif
 /*
  * Class:     com_tcl_alvin_tcl_drone_project_util_TCLNdkJniUtils
- * Method:    naGetConvertedFrame
- * Signature: (Landroid/graphics/Bitmap;[BII)V
+ * Method:    getStringFormC
+ * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT void JNICALL Java_com_tcl_alvin_tcl_1drone_1project_util_TCLNdkJniUtils_naGetConvertedFrame
-  (JNIEnv *, jclass, jobject, jbyteArray, jint, jint);
+JNIEXPORT jstring JNICALL Java_com_tcl_alvin_tcl_1drone_1project_util_TCLNdkJniUtils_getStringFormC
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     com_tcl_alvin_tcl_drone_project_util_TCLNdkJniUtils
+ * Method:    decodeYUV420SP
+ * Signature: ([BII)[I
+ */
+JNIEXPORT jintArray JNICALL Java_com_tcl_alvin_tcl_1drone_1project_util_TCLNdkJniUtils_decodeYUV420SP
+  (JNIEnv *, jclass, jbyteArray, jint, jint);
 
 #ifdef __cplusplus
 }

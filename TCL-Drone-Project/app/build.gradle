@@ -10,6 +10,11 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        ndk {
+            moduleName "TCLJni"  //设置库(so)文件名称
+            abiFilters "armeabi", "armeabi-v7a", "x86"
+        }
+
     }
     buildTypes {
         release {
@@ -22,12 +27,15 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.google.android.gms:play-services:7.8.+'
 
-    if (rootProject.hasProperty('buildWithLocalSDK')){
+    if (rootProject.hasProperty('buildWithLocalSDK')) {
         compile project(':arsdk')
     } else {
         compile 'com.parrot:arsdk:3.9.0'
     }
+    compile 'com.android.support:appcompat-v7:24.0.0-alpha2'
+    compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.google.android.gms:play-services-ads:8.4.0'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
 }

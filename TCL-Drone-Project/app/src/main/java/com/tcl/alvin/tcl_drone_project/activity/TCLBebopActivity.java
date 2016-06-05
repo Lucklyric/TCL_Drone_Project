@@ -68,6 +68,9 @@ public class TCLBebopActivity extends AppCompatActivity {
     private Boolean outPutFaceFlag = false;
     private Boolean ifAutoMode = false;
 
+    static {
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -445,16 +448,15 @@ public class TCLBebopActivity extends AppCompatActivity {
                          * Update the latest frame on the image view
                          */
                         if (mVideoView.ba != null){
-                            YuvImage yuvimage = new YuvImage(mVideoView.ba, ImageFormat.NV21, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT, null);
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            yuvimage.compressToJpeg(new Rect(0, 0, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT), 100, baos);
-                            byte[] jdata = baos.toByteArray();
-                            Bitmap bmp = BitmapFactory.decodeByteArray(jdata,0,jdata.length);
+//                            YuvImage yuvimage = new YuvImage(mVideoView.ba, ImageFormat.NV21, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT, null);
+//                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                            yuvimage.compressToJpeg(new Rect(0, 0, mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT), 100, baos);
+//                            byte[] jdata = baos.toByteArray();
+//                            Bitmap bmp = BitmapFactory.decodeByteArray(jdata,0,jdata.length);
 
-                            Bitmap prBitmap = Bitmap.createBitmap(mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT, Bitmap.Config.ARGB_8888);
-
-                           TCLNdkJniUtils.naGetConvertedFrame(prBitmap,mVideoView.ba,mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT);
-
+                            Bitmap bmp = Bitmap.createBitmap(mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT, Bitmap.Config.ARGB_8888);
+                            bmp.setPixels(TCLNdkJniUtils.decodeYUV420SP(mVideoView.ba,mVideoView.VIDEO_WIDTH,mVideoView.VIDEO_HEIGHT),0,mVideoView.VIDEO_WIDTH,0,0,mVideoView.VIDEO_WIDTH,mVideoView.VIDEO_HEIGHT);
+                           //TCLNdkJniUtils.naGetConvertedFrame(prBitmap,mVideoView.ba,mVideoView.VIDEO_WIDTH, mVideoView.VIDEO_HEIGHT);
 
 //                            Bitmap mutableBitmap = bmp.copy(Bitmap.Config.RGB_565, true);
 //                            int face_count = mFaceDetector.findFaces(mutableBitmap, faces);
@@ -479,24 +481,24 @@ public class TCLBebopActivity extends AppCompatActivity {
 //                                canvas.drawCircle(face.getPosition().x, face.getPosition().y, 10, tmp_paint);
 //                            }
                             System.out.println("[TCL DEBUG]:Before send receive frame");
-                            mGraphicFaceTrackerFactory.resetFaces(); /*Clear face array*/
-                            detector.receiveFrame(frame); /*Feed frame to detector*/
-                            mGraphicFaceTrackerFactory.setmCurrentFrame(bmp); /*Set base frame of factory*/
-                            if (outPutFaceFlag){
-                                /*Output all faces to the phone storage*/
-                                mGraphicFaceTrackerFactory.saveAllFaces();
-                                outPutFaceFlag = false;
-                            }
-                            if (ifAutoMode){
-                                droneController.onUpdate();
-                            }
+//                            mGraphicFaceTrackerFactory.resetFaces(); /*Clear face array*/
+//                            detector.receiveFrame(frame); /*Feed frame to detector*/
+//                            mGraphicFaceTrackerFactory.setmCurrentFrame(bmp); /*Set base frame of factory*/
+//                            if (outPutFaceFlag){
+//                                /*Output all faces to the phone storage*/
+//                                mGraphicFaceTrackerFactory.saveAllFaces();
+//                                outPutFaceFlag = false;
+//                            }
+//                            if (ifAutoMode){
+//                                droneController.onUpdate();
+//                            }
                             System.out.println("[TCL DEBUG]:After send receive frame");
                             mVideoView.setImageBitmap(bmp);
                         }
                     }
                 }); //this function can change value of mInterval.
             } finally {
-                handler.postDelayed(mStatusChecker, 1000/15);
+                handler.postDelayed(mStatusChecker, 1000/30);
             }
         }
     };
