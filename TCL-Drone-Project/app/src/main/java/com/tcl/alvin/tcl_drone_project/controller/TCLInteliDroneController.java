@@ -1,5 +1,7 @@
 package com.tcl.alvin.tcl_drone_project.controller;
 
+import android.widget.TextView;
+
 import com.google.android.gms.vision.face.Face;
 import com.tcl.alvin.tcl_drone_project.model.TCLBebopDrone;
 
@@ -23,8 +25,9 @@ public class TCLInteliDroneController {
     private TCLBebopDrone droneInstance;
     private long mLastTimeStamp;
     private boolean mLastFrameHasFace;
+    private TextView mLogView;
 
-    public TCLInteliDroneController(int height, int width, TCLGraphicFaceTrackerFactory trackerFactory, TCLBebopDrone drone) {
+    public TCLInteliDroneController(int height, int width, TCLGraphicFaceTrackerFactory trackerFactory, TCLBebopDrone drone, TextView logView) {
         this.mStatus = TCL_DRONE_CONTROLLER_STATUS.IDEL;
         this.mImageHeight = height;
         this.mImageWidth = width;
@@ -32,6 +35,7 @@ public class TCLInteliDroneController {
         this.droneInstance = drone;
         this.mLastTimeStamp = System.currentTimeMillis();
         this.mLastFrameHasFace = false;
+        this.mLogView = logView;
     }
 
 
@@ -40,15 +44,15 @@ public class TCLInteliDroneController {
     }
 
     public void judgeAction() {
-//        long tmpTimeStamp = System.currentTimeMillis();
-//        if ((tmpTimeStamp - mLastTimeStamp)<(1000*2)){
-//            return;
-//        }else{
-//            mLastTimeStamp = tmpTimeStamp;
-//        }
-
-
+        long tmpTimeStamp = System.currentTimeMillis();
+        int droneFlag = 0;
         if (faceTrackerFactoryInstance.currentFaces().size() > 0) {
+//            if ((tmpTimeStamp - mLastTimeStamp)<(1000*2)){
+//                return;
+//            }else{
+//                mLastTimeStamp = tmpTimeStamp;
+//            }
+            mLastTimeStamp = tmpTimeStamp;
             mLastFrameHasFace = true;
             Face face = faceTrackerFactoryInstance.currentFaces().get(0);
             float x = (face.getPosition().x + face.getWidth() / 2);
@@ -57,39 +61,70 @@ public class TCLInteliDroneController {
             float centerX = mImageWidth / 2;
             float centerY = mImageHeight / 2;
 
-            if ((y - centerY) > 0) {
-                droneInstance.setGaz((byte) -50);
+
+            if ((face.getHeight()/mImageHeight)>0.6){
+                droneInstance.setPitch((byte) 10);
+                //droneInstance.setFlag((byte) 1);
+                droneFlag = 1;
+                mLogView.setText(mLastTimeStamp+"back");
+                System.out.println("[TCL DEBUG]:back");
+
+
+            }else if ((face.getHeight()/mImageHeight)<0.2){
+                droneInstance.setPitch((byte) -10);
+                droneFlag = 1;
+                mLogView.setText(mLastTimeStamp+"forward");
+                System.out.println("[TCL DEBUG]:forward");
+
+            }else{
+                droneInstance.setPitch((byte) 0);
+                //droneInstance.setFlag((byte) 0);
+            }
+
+            if ((y - centerY) > 10) {
+                droneInstance.setGaz((byte) -25);
                 System.out.println("[TCL DEBUG]:Gaz DOWN");
-            } else if ((y - centerY) < 0) {
-                droneInstance.setGaz((byte) 50);
+                mLogView.setText(mLastTimeStamp+"GazDown");
+
+            } else if ((y - centerY) < -10) {
+                droneInstance.setGaz((byte) 25);
                 System.out.println("[TCL DEBUG]:Gaz up");
+                mLogView.setText(mLastTimeStamp+"Gazup");
             } else{
                 droneInstance.setGaz((byte) 0);
+                mLogView.setText(mLastTimeStamp+"Gza zero");
             }
 
-            if ((x - centerX) > 0) {
-                droneInstance.setRoll((byte) -50);
-                droneInstance.setFlag((byte) 1);
-                System.out.println("[TCL DEBUG]:Roll left");
-
-            } else if ((x - centerX) < 0) {
-                droneInstance.setRoll((byte) 50);
-                droneInstance.setFlag((byte) 1);
+            if ((x - centerX) > 50) {
+                droneInstance.setRoll((byte) 10);
+                droneFlag = 1;
+                mLogView.setText(mLastTimeStamp+"Roll right");
                 System.out.println("[TCL DEBUG]:Roll right");
+
+            } else if ((x - centerX) < -50) {
+                droneInstance.setRoll((byte) -10);
+                droneFlag = 1;
+                mLogView.setText(mLastTimeStamp+"Roll left");
+                System.out.println("[TCL DEBUG]:Roll left");
             } else {
                 droneInstance.setRoll((byte) 0);
-                droneInstance.setFlag((byte) 0);
-
+                //droneInstance.setFlag((byte) 0);
+                mLogView.setText(mLastTimeStamp+"Roll zero");
             }
 
+            droneInstance.setFlag((byte) droneFlag);
+
         }else{
-            mLastFrameHasFace = false;
-            droneInstance.setGaz((byte) 0);
-            droneInstance.setFlag((byte) 0);
-            droneInstance.setRoll((byte) 0);
+            if (mLastFrameHasFace){
+                mLastFrameHasFace = false;
+                droneInstance.setGaz((byte) 0);
+                droneInstance.setRoll((byte) 0);
+                droneInstance.setPitch((byte) 0);
+                droneInstance.setFlag((byte) 0);
+                mLogView.setText(mLastTimeStamp+"Empty");
+                System.out.println("[TCL DEBUG]:Empty");
+
+            }
         }
-
     }
-
-
 }

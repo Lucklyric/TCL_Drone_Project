@@ -70,7 +70,7 @@ void initTable()
 JNIEXPORT jintArray JNICALL Java_com_tcl_alvin_tcl_1drone_1project_util_TCLNdkJniUtils_decodeYUV420SP
         (JNIEnv * env, jclass obj, jbyteArray buf, jint width, jint height){
     if (!buf){
-        return NULL;
+        return (*env)->NewIntArray(env, 0);
     }
     jbyte * yuv420sp = (*env)->GetByteArrayElements(env, buf, 0);
 

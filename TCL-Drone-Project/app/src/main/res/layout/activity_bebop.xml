@@ -186,5 +186,18 @@
         android:layout_alignTop="@+id/takeOffOrLandBt"
         android:layout_alignEnd="@+id/backBt" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Action"
+        android:id="@+id/controlLog"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/forwardBt"
+        android:layout_alignBottom="@+id/emergencyBt"
+        android:background="#fefefe"
+        android:textColor="#030303"
+        android:textSize="@dimen/abc_action_bar_content_inset_material" />
+
 
 </RelativeLayout>
