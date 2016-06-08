@@ -137,7 +137,7 @@ public class TCLInteliDroneController {
             }
 
             if (mStatus == TCL_DRONE_CONTROLLER_STATUS.NOFACE) {
-                if ((tmpTimeStamp - mTimeLostFace) > (1000 * 3)) {
+                if ((tmpTimeStamp - mTimeLostFace) > (1000 * 4)) {
                     mLogView.setText(mTimeLostFace + "Searching");
                     mStatus = TCL_DRONE_CONTROLLER_STATUS.SEARCHING;
                     droneInstance.setYaw((byte) 10);
