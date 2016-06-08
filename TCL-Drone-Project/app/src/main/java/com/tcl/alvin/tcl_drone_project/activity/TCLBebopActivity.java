@@ -241,7 +241,6 @@ public class TCLBebopActivity extends AppCompatActivity {
             }
         });
 
-
         findViewById(R.id.gazUpBt).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -260,7 +259,6 @@ public class TCLBebopActivity extends AppCompatActivity {
 
                         break;
                 }
-
                 return true;
             }
         });

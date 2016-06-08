@@ -48,10 +48,10 @@ public class TCLGraphicFaceTrackerFactory implements MultiProcessor.Factory<Face
         }
     }
     public void enterFace(Face face){
+        mFaces.add(face);
         try{
             Bitmap tmp = Bitmap.createBitmap(this.mCurrentFrame,(int)face.getPosition().x,(int)face.getPosition().y,(int)face.getWidth(),(int)face.getHeight());
             mFacesBitmap.add(tmp);
-            mFaces.add(face);
         }catch (Exception e){
             e.printStackTrace();
         }
