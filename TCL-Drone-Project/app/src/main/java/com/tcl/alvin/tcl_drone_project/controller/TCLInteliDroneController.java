@@ -11,7 +11,7 @@ import com.tcl.alvin.tcl_drone_project.model.TCLBebopDrone;
 
 public class TCLInteliDroneController {
     public enum TCL_DRONE_CONTROLLER_STATUS {
-        IDEL, NOFACE, SEARCHING
+        IDEL, NOFACE, SEARCHING, TRACKING
     }
 
     public enum TCL_DRONE_CONTROLLER_ACTION {
@@ -56,7 +56,7 @@ public class TCLInteliDroneController {
                 droneInstance.setYaw((byte) 0);
                 droneFlag = 1;
             }
-
+            mStatus = TCL_DRONE_CONTROLLER_STATUS.TRACKING;
             mLastTimeStamp = tmpTimeStamp;
             mLastFrameHasFace = true;
             Face face = faceTrackerFactoryInstance.currentFaces().get(0);
@@ -140,7 +140,7 @@ public class TCLInteliDroneController {
                 if ((tmpTimeStamp - mTimeLostFace) > (1000 * 4)) {
                     mLogView.setText(mTimeLostFace + "Searching");
                     mStatus = TCL_DRONE_CONTROLLER_STATUS.SEARCHING;
-                    droneInstance.setYaw((byte) 10);
+                    droneInstance.setYaw((byte) 20);
                     droneInstance.setFlag((byte) 1);
                 }
             }
